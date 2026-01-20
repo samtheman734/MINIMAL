@@ -1,0 +1,61 @@
+variables = {}
+def tokenize(line):
+    return line.replace('=', ' = ').replace('+', ' + ').split()
+def parse(tokens):
+    if tokens[0] == 'print':
+        return ('print', tokens[1])
+    elif '=' in tokens:
+        eq_index = tokens.index('=')
+        var_name = tokens[0]
+        expr = tokens[eq_index + 1:]
+        return ('assign', var_name, expr)
+    else:
+        return None
+def evaluate(expr):
+    if len(expr) == 1:
+        token = expr[0]
+        if token.isdigit():
+            return int(token)
+        elif token in variables:
+            return variables[token]
+        else:
+            raise ValueError(f"Unknown token: {token}")
+    elif len(expr) == 3:
+        left, op, right = expr
+        left_val = evaluate([left])
+        right_val = evaluate([right])
+        if op == '+':
+            return left_val + right_val
+        else:
+            raise ValueError(f"Unknown operator: {op}")
+    else:
+        raise ValueError("Invalid expression format")
+def run_line(line):
+    tokens = tokenize(line)
+    command = parse(tokens)
+    if command:
+        if command[0] == 'assign':
+            _, var_name, expr = command
+            variables[var_name] = evaluate(expr)
+        elif command[0] == 'print':
+            _, var_or_value = command
+            if var_or_value in variables:
+                print(variables[var_or_value])
+            elif var_or_value.isdigit():
+                print(int(var_or_value))
+            else:
+                print(var_or_value)
+    else:
+        print("Invalid command or syntax.")
+def run_repl():
+	print("MINIMAL Programming language 2026. Type 'exit' to quit.")
+	while True:
+		line = input('> ')
+		if line.strip().lower() == 'exit':
+			break
+		try:
+			run_line(line)
+		except Exception as e:
+			print(f"Error: {e}")
+			
+run_repl()
