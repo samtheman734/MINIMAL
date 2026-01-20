@@ -1,9 +1,13 @@
 variables = {}
+
 def tokenize(line):
+    # Insert spaces around operators for splitting
     return line.replace('=', ' = ').replace('+', ' + ').split()
+
 def parse(tokens):
     if tokens[0] == 'print':
-        return ('print', tokens[1])
+        # For print, return the expression to evaluate
+        return ('print', tokens[1:])
     elif '=' in tokens:
         eq_index = tokens.index('=')
         var_name = tokens[0]
@@ -11,7 +15,9 @@ def parse(tokens):
         return ('assign', var_name, expr)
     else:
         return None
+
 def evaluate(expr):
+    # Evaluate an expression
     if len(expr) == 1:
         token = expr[0]
         if token.isdigit():
@@ -27,24 +33,21 @@ def evaluate(expr):
         if op == '+':
             return left_val + right_val
         else:
-            raise ValueError(f"Unknown operator: {op}")
+            raise ValueError(f"Unsupported operator: {op}")
     else:
         raise ValueError("Invalid expression format")
+
 def run_line(line):
     tokens = tokenize(line)
-    command = parse(tokens)
-    if command:
-        if command[0] == 'assign':
-            _, var_name, expr = command
+    cmd = parse(tokens)
+    if cmd:
+        if cmd[0] == 'assign':
+            _, var_name, expr = cmd
             variables[var_name] = evaluate(expr)
-        elif command[0] == 'print':
-            _, var_or_value = command
-            if var_or_value in variables:
-                print(variables[var_or_value])
-            elif var_or_value.isdigit():
-                print(int(var_or_value))
-            else:
-                print(var_or_value)
+        elif cmd[0] == 'print':
+            _, expr = cmd
+            result = evaluate(expr)
+            print(result)
     else:
         print("Invalid command or syntax.")
 def run_repl():
@@ -59,3 +62,6 @@ def run_repl():
 			print(f"Error: {e}")
 			
 run_repl()
+		
+		
+
